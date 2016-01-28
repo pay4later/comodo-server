@@ -1,0 +1,31 @@
+{
+  "name": "pay4later/phpcomodo-server",
+  "description": "",
+  "keywords": ["comodo", "antivirus"],
+  "homepage": "https://github.com/pay4later/phpcomdo-server",
+  "type": "project",
+  "minimum-stability": "stable",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Andrew Mackrodt",
+      "email": "andrew.mackrodt@pay4later.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.5",
+    "php-di/php-di": "~5.2",
+    "ocramius/generated-hydrator": "~1.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "Pay4Later\\": "src/"
+    },
+    "classmap": [
+      "gen/hydrators"
+    ]
+  },
+  "scripts": {
+    "generate-hydrators": "php bin/generate-hydrators"
+  }
+}

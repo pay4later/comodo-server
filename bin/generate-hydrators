@@ -1,0 +1,30 @@
+#!/usr/bin/env php
+<?php
+
+use GeneratedHydrator\Configuration;
+use Pay4Later\Comodo\ComodoSettings;
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+$classes = [
+    ComodoSettings::class,
+];
+
+chdir(__DIR__ . '/..');
+
+foreach (glob('gen/hydrators/*.php') as $file) {
+    unlink($file);
+}
+
+// ignore classmap errors caused by previously deleted files
+error_reporting(0);
+ini_set('error_log', '/dev/null');
+
+foreach ($classes as $class) {
+    echo "> $class\n";
+    $config = new Configuration($class);
+    $config->setGeneratedClassesTargetDir('gen/hydrators');
+    $config->createFactory()->getHydratorClass();
+}
+
+exec('composer dump-autoload 2>&1');

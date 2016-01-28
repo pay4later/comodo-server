@@ -1,0 +1,12 @@
+<?php
+/*
+ * copy this file to local.php and add any local machine global.php overrides
+ */
+
+return [
+    'comodo' => [
+        'settings' => [
+            'path' => '/opt/COMODO'
+        ]
+    ]
+];
