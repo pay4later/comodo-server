@@ -11,6 +11,13 @@ return [
         'Pay4Later\Comodo\ComodoSettings' => [
             'factory'   => ['@hydrator', 'hydrate'],
             'arguments' => ['@comodo_settings', '!Pay4Later\Comodo\ComodoSettings']
-        ]
+        ],
+        'guzzle' => 'Guzzle\Http\ClientInterface',
+        'Guzzle\Http\ClientInterface' => [
+            'object' => 'Guzzle\Http\Client',
+            'methods' => [
+                ['setUserAgent', ['Pay4Later Virus Scanner 1.0']]
+            ]
+        ],
     ]
 ];

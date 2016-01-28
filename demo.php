@@ -9,6 +9,7 @@ file_put_contents($eicar, 'X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-
 $ch = curl_init($comodoServer);
 curl_setopt($ch, CURLOPT_POSTFIELDS, ['passwd' => curl_file_create('/etc/passwd'), 'eicar' => curl_file_create($eicar)]);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+if (getenv('DEBUG')) curl_setopt($ch, CURLOPT_COOKIE, 'XDEBUG_SESSION=phpstorm');
 echo "Testing file upload:\n";
 echo curl_exec($ch);
 unset($ch);
@@ -18,8 +19,9 @@ echo "\n";
 
 // remote url example
 $ch = curl_init($comodoServer);
-curl_setopt($ch, CURLOPT_POSTFIELDS, ['passwd' => 'https://en.wikipedia.org/wiki/Passwd', 'eicar' => 'http://www.eicar.org/download/eicar.com.txt']);
+curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(['files' => ['passwd' => 'https://en.wikipedia.org/wiki/Passwd', 'eicar' => 'http://www.eicar.org/download/eicar.com.txt']]));
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+if (getenv('DEBUG')) curl_setopt($ch, CURLOPT_COOKIE, 'XDEBUG_SESSION=phpstorm');
 echo "Testing remote file scan:\n";
 echo curl_exec($ch);
 unset($ch);

@@ -60,6 +60,34 @@ Vagrant.configure(2) do |config|
         php5-json php5-mcrypt php5-readline php5-tidy php5-xdebug php5-xsl
       perl -i -pe 's/\\/var\\/www\\/html/\\/vagrant\\/public/g' /etc/apache2/sites-enabled/000-default.conf
       perl -i -pe 's/\\/var\\/www/\\/vagrant/g' /etc/apache2/apache2.conf
+      echo "; load as last item to override other ini settings
+; priority=99
+
+[core]
+date.timezone = Europe/London
+date.default_latitude = 51.500181
+date.default_longitude = -0.12619
+error_reporting = E_ALL
+expose_php = 0
+mail.add_x_header = 0
+max_execution_time = 600
+memory_limit = 256M
+post_max_size = 20M
+session.cookie_httponly = 1
+session.gc_maxlifetime = 3600
+short_open_tag = 1
+upload_max_filesize = 20M
+
+; debug
+display_errors = 1
+session.cookie_secure = 0
+
+[xdebug]
+xdebug.remote_enable = 1
+xdebug.profiler_enable_trigger = 1
+xdebug.profiler_output_name = cachegrind.out.%t
+xdebug.remote_connect_back = 1" | tee /etc/php5/mods-available/dev.ini >/dev/null
+      php5enmod dev
       apache2ctl graceful
       curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
       wget -q http://download.comodo.com/cavmgl/download/installs/1000/standalone/cav-linux_1.1.268025-1_amd64.deb
@@ -67,6 +95,15 @@ Vagrant.configure(2) do |config|
       apt-get -q -y --force-yes install
       wget -q http://download.comodo.com/av/updates58/sigs/bases/bases.cav -O /opt/COMODO/scanners/bases.cav
       /opt/COMODO/post_setup.sh
+    HEREDOC
+
+    box.vm.provision :shell, :privileged => false, :inline => <<-HEREDOC
+      ROOT_SSH_AUTH_SOCK=$(ls -lt1 /tmp/ssh-*/agent.* | awk '$3 == "root" {print $9}' | head -n1)
+      echo Changing SSH_AUTH_SOCK=$ROOT_SSH_AUTH_SOCK
+      [[ -f $ROOT_SSH_AUTH_SOCK ]] && sudo chmod 777 $ROOT_SSH_AUTH_SOCK && export SSH_AUTH_SOCK=$ROOT_SSH_AUTH_SOCK
+      cd /vagrant
+      composer install
+      composer generate-hydrators
     HEREDOC
   end
 end

@@ -39,19 +39,33 @@ return call_user_func(function () {
             continue;
         }
 
-        $factory = (array) $def['factory'];
-        $class = array_shift($factory);
-        $method = array_shift($factory) ?: 'create';
+        $factory = isset($def['factory']) ? (array) $def['factory'] : [];
+        $factoryClass  = array_shift($factory);
+        $factoryMethod = array_shift($factory);
         $arguments = !empty($def['arguments']) ? $def['arguments'] : [];
 
-        $definitions[$id] = function (Container $c) use ($get, $class, $method, $arguments) {
-            $class = $get($c, $class);
-            $method = $get($c, $method);
-            foreach ($arguments as &$argument) {
-                $argument = $get($c, $argument);
+        if ($factoryClass) { // factory configuration
+            $def = function (Container $c) use ($get, $factoryClass, $factoryMethod, $arguments) {
+                $factoryClass = $get($c, $factoryClass);
+                $factoryMethod = $get($c, $factoryMethod ?: 'create');
+                foreach ($arguments as &$argument) {
+                    $argument = $get($c, $argument);
+                }
+                return call_user_func_array([$factoryClass, $factoryMethod], $arguments);
+            };
+        } else {
+            $object = !empty($def['object']) ? $def['object'] : $id;
+            $methods = !empty($def['methods']) ? $def['methods'] : [];
+            $def = DI\object($object);
+            foreach ($methods as $method) {
+                $arguments = $method[1];
+                $method = $method[0];
+                array_unshift($arguments, $method);
+                call_user_func_array([$def, 'method'], $arguments);
             }
-            return call_user_func_array([$class, $method], $arguments);
-        };
+        }
+
+        $definitions[$id] = $def;
     }
 
     $container->addDefinitions($definitions);

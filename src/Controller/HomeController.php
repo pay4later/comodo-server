@@ -3,7 +3,9 @@
 namespace Pay4Later\Controller;
 
 use DI\Container;
+use Guzzle\Http\Exception\ClientErrorResponseException;
 use Pay4Later\Comodo\CmdScan;
+use Pay4Later\Model\RemoteFile;
 
 class HomeController
 {
@@ -37,22 +39,8 @@ class HomeController
             return ['error' => 'At least one file must be set'];
         }
 
-        $scanned = [];
-
-        foreach ($files as $key => $file) {
-            $scanned[$key] = [
-                'path' => $file['tmp_name'],
-                'uri' => $file['name']
-            ];
-        }
-
-        foreach ($urls as $key => $url) {
-            throw new \Exception('Not Supported');
-            $scanned[$key] = [
-                'path' => file_put_contents('/tmp/unique', file_get_contents($url)),
-                'uri' => $url
-            ];
-        }
+        if ($files) $scanned = $this->getLocalFilesToScan($files);
+        else if ($urls) $scanned = $this->getRemoteFilesToScan($urls);
 
         $cmdScan = $this->container->get(CmdScan::class);
         $details = [];
@@ -82,5 +70,62 @@ class HomeController
             'elapsed'  => number_format($elapsed, 3),
             'details'  => $details
         ];
+    }
+
+    /**
+     * @todo move to model
+     * @param array $files
+     * @return array
+     */
+    private function getLocalFilesToScan(array $files)
+    {
+        $result = [];
+        foreach ($files as $key => $file) {
+            $result[$key] = [
+                'path' => $file['tmp_name'],
+                'uri'  => $file['name']
+            ];
+        }
+        return $result;
+    }
+
+    /**
+     * @todo move to model
+     * @param array $files
+     * @return array
+     */
+    private function getRemoteFilesToScan(array $files)
+    {
+        $remoteFiles = [];
+        /** @var RemoteFile $remoteFile */
+
+        // check for the existence of all remote files
+        foreach ($files as $key => $url) {
+            // todo implement a RemoteFileService
+            $remoteFile = $this->container->make(RemoteFile::class, ['url' => $url]);
+            if (!$remoteFile->exists()) {
+                header('HTTP/1.1 400 Bad Request');
+                return ['error' => 'File not found: ' . $url];
+            }
+            $remoteFiles[$key] = $remoteFile;
+        }
+
+        $result = [];
+
+        try {
+            // create a local copy of remote files
+            foreach ($remoteFiles as $key => $remoteFile) {
+                $result[$key] = [
+                    'path' => $remoteFile->getLocalPath(),
+                    'uri'  => $remoteFile->getUrl(),
+                    'meta' => $remoteFiles
+                ];
+            }
+        } catch (ClientErrorResponseException $e) {
+            header('HTTP/1.1 400 Bad Request');
+            return ['error' => 'Failed to retrieve file: ' . $remoteFile->getUrl()];
+        }
+
+        return $result;
     }
 }
