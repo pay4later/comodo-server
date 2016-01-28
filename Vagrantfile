@@ -65,8 +65,7 @@ Vagrant.configure(2) do |config|
       wget -q http://download.comodo.com/cavmgl/download/installs/1000/standalone/cav-linux_1.1.268025-1_amd64.deb
       dpkg -i cav-linux_1.1.268025-1_amd64.deb
       apt-get -q -y --force-yes install
-      cd /opt/COMODO/scanners
-      wget -q http://download.comodo.com/av/updates58/sigs/bases/bases.cav
+      wget -q http://download.comodo.com/av/updates58/sigs/bases/bases.cav -O /opt/COMODO/scanners/bases.cav
       /opt/COMODO/post_setup.sh
     HEREDOC
   end
