@@ -4,9 +4,7 @@
  */
 
 return [
-    'comodo' => [
-        'settings' => [
-            'path' => '/opt/COMODO'
-        ]
+    'comodo_settings' => [
+        'path' => '/opt/COMODO'
     ]
 ];
