@@ -39,29 +39,29 @@ return call_user_func(function () {
             continue;
         }
 
-        $factory = isset($def['factory']) ? (array) $def['factory'] : [];
-        $factoryClass  = array_shift($factory);
-        $factoryMethod = array_shift($factory);
-        $arguments = !empty($def['arguments']) ? $def['arguments'] : [];
+        if (isset($def['factory'])) { // factory configuration
+            $factory = $def['factory'];
+            $object = $factory['object'];
+            $method = isset($factory['method']) ? $factory['method'] : 'create';
+            $params = isset($factory['params']) ? $factory['params'] : [];
 
-        if ($factoryClass) { // factory configuration
-            $def = function (Container $c) use ($get, $factoryClass, $factoryMethod, $arguments) {
-                $factoryClass = $get($c, $factoryClass);
-                $factoryMethod = $get($c, $factoryMethod ?: 'create');
-                foreach ($arguments as &$argument) {
-                    $argument = $get($c, $argument);
+            $def = function (Container $c) use ($get, $object, $method, $params) {
+                $object = $get($c, $object);
+                $method = $get($c, $method);
+                foreach ($params as &$param) {
+                    $param = $get($c, $param);
                 }
-                return call_user_func_array([$factoryClass, $factoryMethod], $arguments);
+                return call_user_func_array([$object, $method], $params);
             };
         } else {
             $object = !empty($def['object']) ? $def['object'] : $id;
             $methods = !empty($def['methods']) ? $def['methods'] : [];
             $def = DI\object($object);
             foreach ($methods as $method) {
-                $arguments = $method[1];
+                $params = $method[1];
                 $method = $method[0];
-                array_unshift($arguments, $method);
-                call_user_func_array([$def, 'method'], $arguments);
+                array_unshift($params, $method);
+                call_user_func_array([$def, 'method'], $params);
             }
         }
 

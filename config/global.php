@@ -9,8 +9,11 @@ return [
         'hydrator' => 'Pay4Later\Stdlib\HydratorService',
         'settings' => 'Pay4Later\Comodo\ComodoSettings',
         'Pay4Later\Comodo\ComodoSettings' => [
-            'factory'   => ['@hydrator', 'hydrate'],
-            'arguments' => ['@comodo_settings', '!Pay4Later\Comodo\ComodoSettings']
+            'factory'   => [
+                'object' => '@hydrator',
+                'method' => 'hydrate',
+                'params' => ['@comodo_settings', '!Pay4Later\Comodo\ComodoSettings']
+            ],
         ],
         'guzzle' => 'Guzzle\Http\ClientInterface',
         'Guzzle\Http\ClientInterface' => [

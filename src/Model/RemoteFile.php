@@ -4,6 +4,7 @@ namespace Pay4Later\Model;
 
 use Guzzle\Http\ClientInterface;
 use Guzzle\Http\Exception\ClientErrorResponseException;
+use Pay4Later\Exception\FileWriteException;
 
 class RemoteFile
 {
@@ -46,8 +47,8 @@ class RemoteFile
         if (!$this->localPath) {
             $filePath = $this->getTempFilePath();
             $hnd = fopen($filePath, 'wb');
-            if (!$hnd) { // todo create Pay4Later Exception
-                throw new \Exception('Could not write to file: ' . $filePath);
+            if (!$hnd) {
+                throw FileWriteException::create($filePath);
             }
             try {
                 $this->client->get($this->url)
