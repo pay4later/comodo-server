@@ -78,9 +78,9 @@ class VirusScanner
         // check for the existence of all remote files
         foreach ($files as $key => $url) {
             $remoteFile = $this->remoteFileService->create($url);
-            if (!$remoteFile->exists()) {
-                throw FileNotFoundException::create($url);
-            }
+//            if (!$remoteFile->exists()) {
+//                throw FileNotFoundException::create($url);
+//            }
             $remoteFiles[$key] = $remoteFile;
         }
 
